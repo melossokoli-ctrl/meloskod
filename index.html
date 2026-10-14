@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kosovo Explore — AI</title>
+<meta name="description" content="Eksploro Kosovën me AI: harta, moti, foto, video dhe planifikues udhëtimi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d12;--bg2:#12151d;--card:#171b25;--card2:#1d2230;--line:#262c3a;
+  --text:#eef1f7;--muted:#8d95a8;--acc:#f5b942;--acc2:#2fd3a5;--danger:#ff6b6b;
+  --r:16px;--sh:0 10px 40px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Manrope',system-ui,sans-serif;background:
+  radial-gradient(1100px 600px at 10% -10%,rgba(245,185,66,.14),transparent 60%),
+  radial-gradient(900px 500px at 100% 0%,rgba(47,211,165,.12),transparent 60%),var(--bg);
+  color:var(--text);min-height:100vh}
+a{color:var(--acc)}
+h1,h2,h3,.syne{font-family:'Syne',sans-serif}
+
+/* ---------- header ---------- */
+header{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:rgba(11,13,18,.78);border-bottom:1px solid var(--line)}
+.wrap{max-width:1440px;margin:0 auto;padding:0 20px}
+.hd{display:flex;align-items:center;justify-content:space-between;height:66px;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;font-family:'Syne';font-weight:800;font-size:20px;letter-spacing:-.02em}
+.logo .dot{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;color:#111;font-size:15px}
+.nav{display:flex;gap:6px;align-items:center}
+.nav button,.nav a{background:transparent;border:1px solid transparent;color:var(--muted);padding:8px 12px;border-radius:10px;cursor:pointer;font:inherit;font-size:13px;font-weight:600;text-decoration:none}
+.nav button:hover,.nav a:hover{color:var(--text);border-color:var(--line);background:var(--card)}
+.nav .pill{border:1px solid var(--line);background:var(--card);color:var(--acc2);font-size:12px;display:flex;gap:6px;align-items:center}
+.nav .pill i{width:7px;height:7px;border-radius:50%;background:var(--acc2);display:inline-block;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ---------- live weather strip ---------- */
+.strip{border-bottom:1px solid var(--line);background:var(--bg2);overflow:hidden}
+.strip .wrap{display:flex;gap:10px;align-items:center;height:44px;overflow-x:auto;scrollbar-width:none}
+.strip .wrap::-webkit-scrollbar{display:none}
+.strip .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;margin-right:6px}
+.wchip{display:flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:13px;white-space:nowrap;cursor:pointer;transition:.2s}
+.wchip:hover{border-color:var(--acc);transform:translateY(-1px)}
+.wchip b{font-weight:700}.wchip span{color:var(--muted)}
+
+/* ---------- hero / layout ---------- */
+.hero{padding:34px 0 10px}
+.hero h1{font-size:clamp(28px,4vw,46px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+.hero h1 em{font-style:normal;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{color:var(--muted);margin-top:10px;max-width:640px;font-size:15px}
+.grid{display:grid;grid-template-columns:420px 1fr;gap:18px;padding:18px 0 30px}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh)}
+
+/* ---------- chat ---------- */
+.chat{display:flex;flex-direction:column;height:calc(100vh - 170px);min-height:560px;position:sticky;top:80px}
+@media(max-width:1000px){.chat{position:static;height:560px}}
+.chat .top{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+.chat .top h3{font-size:15px;font-weight:700}
+.chat .top small{color:var(--muted);font-size:11px}
+.msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+.m{max-width:88%;padding:11px 14px;border-radius:14px;font-size:14px;line-height:1.55;white-space:pre-wrap;animation:up .25s ease}
+@keyframes up{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.m.u{align-self:flex-end;background:linear-gradient(135deg,var(--acc),#e6a52f);color:#111;border-bottom-right-radius:4px;font-weight:500}
+.m.b{align-self:flex-start;background:var(--card2);border:1px solid var(--line);border-bottom-left-radius:4px}
+.m.b.warn{border-color:rgba(255,107,107,.4)}
+.m .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.chip{background:var(--bg2);border:1px solid var(--line);color:var(--text);padding:5px 10px;border-radius:999px;font-size:12px;cursor:pointer;font-family:inherit}
+.chip:hover{border-color:var(--acc);color:var(--acc)}
+.typing{display:flex;gap:4px;padding:12px 14px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bl 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.sugg{display:flex;gap:6px;padding:8px 12px 0;flex-wrap:wrap}
+.inp{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.inp input{flex:1;background:var(--bg2);border:1px solid var(--line);color:var(--text);padding:12px 14px;border-radius:12px;font:inherit;font-size:14px;outline:none}
+.inp input:focus{border-color:var(--acc)}
+.btn{background:linear-gradient(135deg,var(--acc),#e6a52f);color:#111;border:0;padding:12px 16px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.07)}.btn:disabled{opacity:.5;cursor:default}
+.btn.ghost{background:var(--bg2);color:var(--text);border:1px solid var(--line)}
+.btn.sm{padding:8px 12px;font-size:13px}
+
+/* ---------- map ---------- */
+.mapcard{overflow:hidden}
+.mapbar{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.mapbar .title{font-weight:700;font-size:15px;margin-right:auto}
+.mapbar .title small{color:var(--muted);font-weight:500;margin-left:8px;font-size:12px}
+.seg{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{background:transparent;border:0;color:var(--muted);padding:6px 11px;border-radius:8px;cursor:pointer;font:inherit;font-size:12px;font-weight:600}
+.seg button.on{background:var(--card2);color:var(--text)}
+.mapwrap{position:relative;height:460px;background:#0f1218}
+.mapwrap iframe{width:100%;height:100%;border:0;display:block}
+.mapnote{position:absolute;inset:auto 12px 12px auto;background:rgba(11,13,18,.85);border:1px solid var(--line);padding:6px 10px;border-radius:8px;font-size:11px;color:var(--muted)}
+
+/* ---------- place panel (weather + facts) ---------- */
+.panel{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;margin-top:18px}
+@media(max-width:900px){.panel{grid-template-columns:1fr}}
+.wx{padding:18px}
+.wx .hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.wx h3{font-size:18px;font-weight:700}
+.wx .sub{color:var(--muted);font-size:12px;margin-top:3px}
+.wx .now{display:flex;align-items:center;gap:16px;margin:14px 0}
+.wx .now .ico{font-size:52px;line-height:1}
+.wx .now .t{font-family:'Syne';font-size:48px;font-weight:800;letter-spacing:-.04em;line-height:1}
+.wx .now .d{color:var(--muted);font-size:13px;margin-top:4px}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.kv div{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:9px 10px}
+.kv b{display:block;font-size:14px}.kv span{font-size:11px;color:var(--muted)}
+.days{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+.day{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 6px;text-align:center}
+.day .n{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.day .i{font-size:24px;margin:6px 0}
+.day .hi{font-weight:700;font-size:14px}.day .lo{color:var(--muted);font-size:12px}
+.day .pp{font-size:11px;color:var(--acc2);margin-top:3px}
+.tip{margin-top:14px;padding:12px 14px;border-radius:12px;background:linear-gradient(135deg,rgba(245,185,66,.12),rgba(47,211,165,.1));border:1px solid var(--line);font-size:13px;line-height:1.5}
+.tip b{color:var(--acc)}
+.facts{padding:18px;display:flex;flex-direction:column;gap:12px}
+.facts h3{font-size:16px}
+.fact{display:flex;gap:12px;align-items:flex-start;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+.fact .ic{font-size:20px;width:28px;text-align:center}
+.fact b{display:block;font-size:13px}.fact span{font-size:12px;color:var(--muted)}
+.near{display:flex;flex-wrap:wrap;gap:6px}
+.near button{background:var(--bg2);border:1px solid var(--line);color:var(--text);padding:6px 10px;border-radius:999px;font-size:12px;cursor:pointer;font-family:inherit}
+.near button:hover{border-color:var(--acc2);color:var(--acc2)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+
+/* ---------- media ---------- */
+.media{margin-top:18px;padding:18px}
+.media h3{font-size:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.media h3 small{color:var(--muted);font-weight:500;font-size:12px}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.photos a{display:block;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:var(--bg2);border:1px solid var(--line)}
+.photos img{width:100%;height:100%;object-fit:cover;transition:.3s}
+.photos a:hover img{transform:scale(1.05)}
+.video{margin-top:12px;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--bg2);border:1px solid var(--line)}
+.video iframe{width:100%;height:100%;border:0}
+.mlinks{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* ---------- must-visit ---------- */
+.sec{padding:30px 0}
+.sec .h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.sec h2{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.sec .h p{color:var(--muted);font-size:14px}
+.filters{display:flex;gap:6px;flex-wrap:wrap}
+.filters button{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:7px 12px;border-radius:999px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:600}
+.filters button.on{background:var(--acc);color:#111;border-color:var(--acc)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.pc{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;transition:.2s;display:flex;flex-direction:column}
+.pc:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:var(--sh)}
+.pc .img{height:140px;background:linear-gradient(135deg,var(--card2),var(--bg2));position:relative;display:grid;place-items:center;font-size:46px}
+.pc .img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.pc .img .wb{position:absolute;top:8px;right:8px;background:rgba(11,13,18,.8);border:1px solid var(--line);padding:3px 8px;border-radius:999px;font-size:12px;font-weight:700}
+.pc .img .cat{position:absolute;top:8px;left:8px;background:rgba(11,13,18,.8);border:1px solid var(--line);padding:3px 8px;border-radius:999px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--acc2)}
+.pc .bd{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column;gap:6px}
+.pc h4{font-size:15px;font-weight:700}
+.pc p{color:var(--muted);font-size:12.5px;line-height:1.45;flex:1}
+.pc .ft{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-top:4px}
+.pc .ft .add{background:transparent;border:1px solid var(--line);color:var(--text);padding:4px 9px;border-radius:999px;font-size:11px;cursor:pointer;font-family:inherit}
+.pc .ft .add:hover,.pc .ft .add.in{border-color:var(--acc2);color:var(--acc2)}
+
+/* ---------- planner drawer ---------- */
+.drawer{position:fixed;right:0;top:0;bottom:0;width:360px;max-width:92vw;background:var(--bg2);border-left:1px solid var(--line);z-index:60;transform:translateX(100%);transition:.3s;display:flex;flex-direction:column;box-shadow:var(--sh)}
+.drawer.open{transform:none}
+.drawer .dh{padding:16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.drawer .dh h3{font-size:16px}
+.drawer .dl{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.pi{display:flex;gap:10px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px}
+.pi .n{font-size:13px;font-weight:600;flex:1}
+.pi .n small{display:block;color:var(--muted);font-weight:400;font-size:11px}
+.pi button{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:16px}
+.drawer .df{padding:12px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.drawer .empty{color:var(--muted);font-size:13px;text-align:center;padding:30px 10px}
+.fab{position:fixed;right:18px;bottom:18px;z-index:50;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#111;border:0;padding:12px 16px;border-radius:999px;font:inherit;font-weight:800;cursor:pointer;box-shadow:var(--sh);display:flex;gap:8px;align-items:center}
+.fab b{background:#111;color:var(--acc);border-radius:999px;padding:1px 8px;font-size:12px}
+
+footer{border-top:1px solid var(--line);padding:22px 0;color:var(--muted);font-size:12px;text-align:center}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hd">
+    <div class="logo"><div class="dot">✦</div> Kosovo <span style="color:var(--acc)">Explore</span></div>
+    <nav class="nav">
+      <button onclick="scrollTo2('#mv')">Vendet</button>
+      <button onclick="randomPlace()">🎲 Befasoje</button>
+      <button onclick="toggleDrawer()">🗺️ Plani im</button>
+      <span class="pill" id="aiPill"><i></i><span id="aiTxt">duke kontrolluar…</span></span>
+    </nav>
+  </div>
+</header>
+
+<div class="strip">
+  <div class="wrap" id="strip"><span class="lbl">Moti tani</span><span style="color:var(--muted);font-size:12px">duke ngarkuar…</span></div>
+</div>
+
+<main class="wrap">
+  <div class="hero">
+    <h1>Eksploro <em>Kosovën</em> me AI</h1>
+    <p>Pyet për një qytet, lagje, mal apo kala — e shoh në Google Maps, ta tregoj motin për sot dhe 5 ditët e ardhshme, fotot, videot dhe çka ia vlen afër. Shto vende në planin tënd dhe hape rrugën direkt në Maps.</p>
+  </div>
+
+  <div class="grid">
+    <!-- CHAT -->
+    <section class="card chat">
+      <div class="top">
+        <div><h3>Udhërrëfyesi AI</h3><small>Vetëm për eksplorimin e Kosovës</small></div>
+        <button class="btn ghost sm" onclick="clearChat()">Pastro</button>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="sugg" id="sugg"></div>
+      <div class="inp">
+        <input id="q" placeholder="p.sh. Çka me vizitu në Prishtinë sot?" autocomplete="off">
+        <button class="btn" id="send" onclick="send()">Dërgo</button>
+      </div>
+    </section>
+
+    <!-- RIGHT -->
+    <section>
+      <div class="card mapcard">
+        <div class="mapbar">
+          <div class="title" id="mapTitle">Kosova <small>zgjedh një vend ose pyet botin</small></div>
+          <div class="seg">
+            <button class="on" data-m="map" onclick="setMode('map')">Hartë</button>
+            <button data-m="sat" onclick="setMode('sat')">Satelit</button>
+            <button data-m="sv" onclick="setMode('sv')">Street View</button>
+          </div>
+          <a class="btn ghost sm" id="openMaps" href="https://www.google.com/maps?q=Kosovo" target="_blank" rel="noopener">Hape në Maps ↗</a>
+        </div>
+        <div class="mapwrap"><iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe><div class="mapnote" id="mapNote">Google Maps</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="card wx" id="wx">
+          <div class="hdr"><div><h3 id="wxName">Moti</h3><div class="sub" id="wxSub">Zgjedh një vend për motin lokal</div></div><div class="sub" id="wxTime"></div></div>
+          <div class="now"><div class="ico" id="wxIco">🌤️</div><div><div class="t" id="wxT">--°</div><div class="d" id="wxD">—</div></div></div>
+          <div class="kv">
+            <div><b id="wxFeel">—</b><span>Ndihet si</span></div>
+            <div><b id="wxWind">—</b><span>Era</span></div>
+            <div><b id="wxHum">—</b><span>Lagështia</span></div>
+            <div><b id="wxSun">—</b><span>Lind / Perëndon</span></div>
+          </div>
+          <div class="days" id="wxDays"></div>
+          <div class="tip" id="wxTip">💡 <b>Këshillë:</b> zgjedh një vend dhe të tregoj çka ia vlen me bo sipas motit.</div>
+        </div>
+        <div class="card facts" id="facts">
+          <h3 id="fName">Info praktike</h3>
+          <div id="factList"><div class="fact"><div class="ic">📍</div><div><b>Zgjedh një vend</b><span>Distanca nga Prishtina, koha e vozitjes, sezoni më i mirë dhe çka ka afër.</span></div></div></div>
+          <div class="actions" id="factActions"></div>
+        </div>
+      </div>
+
+      <div class="card media" id="media">
+        <h3>Foto & video <small id="mediaSub">zgjedh një vend</small></h3>
+        <div class="photos" id="photos"></div>
+        <div class="video hidden" id="video"></div>
+        <div class="mlinks" id="mlinks"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- MUST VISIT -->
+  <section class="sec" id="mv">
+    <div class="h">
+      <div><h2>Vendet që duhet t'i shohësh</h2><p>29 vende të zgjedhura — me motin live në çdo kartë.</p></div>
+      <div class="filters" id="filters"></div>
+    </div>
+    <div class="cards" id="cards"></div>
+  </section>
+</main>
+
+<footer>Kosovo Explore · Google Maps · Open-Meteo · Wikimedia Commons · Ndërtuar me AI</footer>
+
+<!-- PLANNER -->
+<button class="fab" onclick="toggleDrawer()">🗺️ Plani im <b id="planCount">0</b></button>
+<div class="drawer" id="drawer">
+  <div class="dh"><h3>Plani im i udhëtimit</h3><button class="btn ghost sm" onclick="toggleDrawer()">✕</button></div>
+  <div class="dl" id="planList"></div>
+  <div class="df">
+    <button class="btn" onclick="openRoute()">Hape rrugën në Google Maps ↗</button>
+    <button class="btn ghost" onclick="askPlan()">Pyete AI për itinerarin</button>
+    <button class="btn ghost sm" onclick="clearPlan()">Fshije planin</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   KONFIGURIM
+   ========================================================= */
+const GOOGLE_API_KEY = "";   // opsionale: Maps Embed API → Street View brenda faqes
+const YOUTUBE_API_KEY = "";  // opsionale: YouTube Data API v3 → video brenda faqes
+const CHAT_ENDPOINT = "/api/chat";
+const PRISHTINA = {lat:42.6629, lng:21.1655};
+const TZ = "Europe/Belgrade";
+
+/* =========================================================
+   BAZA E VENDEVE (29)
+   ========================================================= */
+const PLACES = [
+ {id:"biblioteka",n:"Biblioteka Kombëtare",c:"Prishtinë",r:"Prishtinë",cat:"qytet",lat:42.6584,lng:21.1582,z:17,ic:"📚",w:"National Library of Kosovo",d:"Ndërtesa më e veçantë e Prishtinës — 99 kupola dhe fasadë rrjetë metalike. E ndërtuar më 1982.",best:"Gjithë vitin",k:["biblioteka","bibliotek"]},
+ {id:"newborn",n:"Monumenti NEWBORN",c:"Prishtinë",r:"Prishtinë",cat:"qytet",lat:42.6598,lng:21.1575,z:18,ic:"🎉",w:"Newborn monument Pristina",d:"Simboli i pavarësisë (2008). Ripikturohet çdo 17 shkurt me një temë të re.",best:"Gjithë vitin",k:["newborn"]},
+ {id:"katedralja",n:"Katedralja Nënë Tereza",c:"Prishtinë",r:"Prishtinë",cat:"histori",lat:42.6577,lng:21.1584,z:17,ic:"⛪",w:"Cathedral of Saint Mother Teresa Pristina",d:"Kulla e saj ofron pamjen më të mirë panoramike të qytetit. Ngjitja kushton pak dhe ia vlen.",best:"Prill–Tetor",k:["katedral","nene tereza","nënë tereza"]},
+ {id:"muzeu",n:"Muzeu i Kosovës",c:"Prishtinë",r:"Prishtinë",cat:"histori",lat:42.6650,lng:21.1668,z:17,ic:"🏛️",w:"Kosovo Museum Pristina",d:"Aty është 'Hyjnesha në Fron' — figura neolitike 6000-vjeçare, simboli i Prishtinës.",best:"Gjithë vitin",k:["muze"]},
+ {id:"germia",n:"Parku i Gërmisë",c:"Prishtinë",r:"Prishtinë",cat:"natyrë",lat:42.6760,lng:21.2075,z:14,ic:"🌳",w:"Germia park Pristina",d:"Mushkëria e Prishtinës: shtigje, piknik, pishina natyrore verës dhe pamje mbi qytet.",best:"Maj–Shtator",k:["germi","gërmi"]},
+ {id:"gracanica",n:"Manastiri i Graçanicës",c:"Graçanicë",r:"Prishtinë",cat:"histori",lat:42.5983,lng:21.1938,z:17,ic:"🕍",w:"Gračanica monastery",d:"Trashëgimi botërore UNESCO (1321). Afresket bizantine janë ndër më të bukurat në Ballkan.",best:"Gjithë vitin",k:["gracanic","graçanic"]},
+ {id:"ulpiana",n:"Ulpiana (Qyteti antik)",c:"Graçanicë",r:"Prishtinë",cat:"histori",lat:42.5886,lng:21.1750,z:16,ic:"🏺",w:"Ulpiana archaeological site",d:"Qytet romak i shek. II — bazilika, mure dhe mozaikë. Vetëm 12 km nga Prishtina.",best:"Prill–Tetor",k:["ulpian"]},
+ {id:"batllava",n:"Liqeni i Batllavës",c:"Podujevë",r:"Prishtinë",cat:"natyrë",lat:42.8290,lng:21.2350,z:13,ic:"🏞️",w:"Batlava Lake",d:"Liqen artificial me restorante buzë ujit, varka dhe freski verës — 30 min nga Prishtina.",best:"Qershor–Shtator",k:["batllav","batlav"]},
+ {id:"gadime",n:"Shpella e Gadimes",c:"Lipjan",r:"Prishtinë",cat:"aventurë",lat:42.5214,lng:21.1114,z:16,ic:"🕳️",w:"Gadime cave",d:"Shpellë mermeri 1,5 km me stalaktite dhe kristale aragoniti unike. 13°C gjithë vitin.",best:"Gjithë vitin",k:["gadime","shpell"]},
+ {id:"prekaz",n:"Kompleksi Memorial Adem Jashari",c:"Prekaz, Skenderaj",r:"Mitrovicë",cat:"histori",lat:42.7303,lng:20.7736,z:16,ic:"🕊️",w:"Adem Jashari memorial Prekaz",d:"Vendi ku nisi UÇK-ja. Shtëpia e familjes Jashari ruhet siç mbeti pas marsit 1998.",best:"Gjithë vitin",k:["prekaz","jashari","skenderaj"]},
+ {id:"kalaja-prizren",n:"Kalaja e Prizrenit",c:"Prizren",r:"Prizren",cat:"histori",lat:42.2075,lng:20.7442,z:16,ic:"🏰",w:"Prizren fortress",d:"Pamja e perëndimit mbi qytetin e vjetër dhe Lumbardhin — foto e detyrueshme e Kosovës.",best:"Prill–Tetor",k:["kala","kalaja"]},
+ {id:"sinan",n:"Xhamia e Sinan Pashës",c:"Prizren",r:"Prizren",cat:"histori",lat:42.2093,lng:20.7398,z:18,ic:"🕌",w:"Sinan Pasha Mosque Prizren",d:"Xhamia osmane e vitit 1615 në zemër të Shadërvanit — pika e takimit të Prizrenit.",best:"Gjithë vitin",k:["sinan","xhami"]},
+ {id:"ura-gurit",n:"Ura e Gurit & Shadërvani",c:"Prizren",r:"Prizren",cat:"qytet",lat:42.2091,lng:20.7406,z:18,ic:"🌉",w:"Old Stone Bridge Prizren",d:"Ura osmane mbi Lumbardh, kafet, akullorja dhe jeta e natës së Prizrenit.",best:"Maj–Tetor",k:["ura e gurit","shadervan","shadërvan","prizren"]},
+ {id:"liga",n:"Lidhja e Prizrenit",c:"Prizren",r:"Prizren",cat:"histori",lat:42.2080,lng:20.7380,z:18,ic:"📜",w:"League of Prizren museum",d:"Kompleksi ku u themelua Lidhja Shqiptare e Prizrenit më 1878.",best:"Gjithë vitin",k:["lidhja","liga"]},
+ {id:"prevalla",n:"Prevalla",c:"Prizren",r:"Prizren",cat:"natyrë",lat:42.1900,lng:20.9230,z:14,ic:"⛰️",w:"Prevalla Kosovo",d:"Livadhe alpine në 1500 m, 25 min nga Prizreni. Freski verës, borë dimrit.",best:"Qershor–Shtator",k:["prevall"]},
+ {id:"brezovica",n:"Brezovica (Ski)",c:"Shtërpcë",r:"Ferizaj",cat:"aventurë",lat:42.1736,lng:21.0170,z:14,ic:"⛷️",w:"Brezovica ski resort",d:"Qendra më e madhe e skijimit në Kosovë, në Malet e Sharrit (deri 2500 m).",best:"Dhjetor–Mars",k:["brezovic","ski"]},
+ {id:"rugova",n:"Gryka e Rugovës",c:"Pejë",r:"Pejë",cat:"natyrë",lat:42.6700,lng:20.1900,z:13,ic:"🏔️",w:"Rugova Canyon",d:"Kanion 25 km me shkëmbinj 1000 m të lartë — ndër më të thellët në Evropë.",best:"Maj–Tetor",k:["rugov"]},
+ {id:"patriarkana",n:"Patriarkana e Pejës",c:"Pejë",r:"Pejë",cat:"histori",lat:42.6613,lng:20.2640,z:17,ic:"⛪",w:"Patriarchate of Peć",d:"UNESCO. Kompleks kishash mesjetare në hyrje të Grykës së Rugovës.",best:"Gjithë vitin",k:["patriark"]},
+ {id:"ferrata",n:"Via Ferrata Ari",c:"Pejë",r:"Pejë",cat:"aventurë",lat:42.6690,lng:20.2250,z:15,ic:"🧗",w:"Via Ferrata Rugova",d:"Ngjitje e siguruar me kabllo në shkëmb dhe zipline mbi Grykë. Adrenalinë e pastër.",best:"Maj–Tetor",k:["ferrata","zipline"]},
+ {id:"liqenat",n:"Liqeni i Liqenatit",c:"Pejë",r:"Pejë",cat:"natyrë",lat:42.6150,lng:20.0750,z:14,ic:"🏔️",w:"Liqenat lake Kosovo",d:"Liqen akullnajor në 1800 m, pika e nisjes për Majën e Gjeravicës (2656 m).",best:"Qershor–Shtator",k:["liqenat","gjeravic"]},
+ {id:"radavc",n:"Burimi i Drinit të Bardhë",c:"Radavc, Pejë",r:"Pejë",cat:"natyrë",lat:42.7230,lng:20.3180,z:16,ic:"💧",w:"White Drin waterfall Radavc",d:"Ujëvarë dhe shpellë ku buron Drini i Bardhë. Piknik klasik i verës.",best:"Prill–Tetor",k:["radavc","drini"]},
+ {id:"decan",n:"Manastiri i Deçanit",c:"Deçan",r:"Pejë",cat:"histori",lat:42.5470,lng:20.2650,z:17,ic:"🕍",w:"Visoki Dečani monastery",d:"UNESCO. Kisha më e madhe mesjetare në Ballkan me mbi 1000 afreske.",best:"Gjithë vitin",k:["decan","deçan"]},
+ {id:"mirusha",n:"Ujëvarat e Mirushës",c:"Malishevë",r:"Rahovec",cat:"natyrë",lat:42.5160,lng:20.6000,z:15,ic:"🌊",w:"Mirusha Waterfalls",d:"12 ujëvara dhe 16 liqene në kanion — më i bukuri për not natyror në Kosovë.",best:"Maj–Shtator",k:["mirush"]},
+ {id:"rahovec",n:"Vreshtat e Rahovecit",c:"Rahovec",r:"Rahovec",cat:"qytet",lat:42.3997,lng:20.6545,z:14,ic:"🍇",w:"Rahovec vineyards",d:"Kryeqyteti i verës së Kosovës — kantina, degustime dhe festa e vjeljes 'Hardh Fest' në shtator.",best:"Shtator–Tetor",k:["rahovec","orahovac","verë","vere","vresht"]},
+ {id:"carshia",n:"Çarshia e Madhe",c:"Gjakovë",r:"Gjakovë",cat:"qytet",lat:42.3800,lng:20.4290,z:17,ic:"🏘️",w:"Grand Bazaar Gjakova",d:"Çarshia osmane më e gjatë në Ballkan (1 km) — zanatet, kafet dhe Xhamia e Hadumit.",best:"Gjithë vitin",k:["çarshi","carshi","gjakov"]},
+ {id:"terzive",n:"Ura e Terzive",c:"Gjakovë",r:"Gjakovë",cat:"histori",lat:42.3300,lng:20.4780,z:17,ic:"🌉",w:"Terzijski bridge",d:"Urë osmane 190 m me 11 harqe mbi Erenik — shek. XV.",best:"Prill–Tetor",k:["terzi"]},
+ {id:"fshejte",n:"Ura e Fshejtë & Drini",c:"Gjakovë",r:"Gjakovë",cat:"aventurë",lat:42.3990,lng:20.5230,z:16,ic:"🛶",w:"Fshajt bridge Drini",d:"Kanioni i Drinit — rafting, kërcim nga ura dhe guximtarët e verës.",best:"Qershor–Shtator",k:["fshejt","fshajt","rafting"]},
+ {id:"ibri",n:"Ura e Ibrit",c:"Mitrovicë",r:"Mitrovicë",cat:"qytet",lat:42.8910,lng:20.8660,z:17,ic:"🌉",w:"Ibar bridge Mitrovica",d:"Ura simbolike që ndan qytetin. Afër: kodra e Miniera e Trepçës dhe Kulla e Xhamisë.",best:"Gjithë vitin",k:["ibr","mitrovic"]},
+ {id:"novoberde",n:"Kalaja e Novobërdës",c:"Novobërdë",r:"Gjilan",cat:"histori",lat:42.6080,lng:21.4330,z:16,ic:"🏰",w:"Novo Brdo fortress",d:"Qytet mesjetar minierash ku pritej argjend për gjysmë Evrope. Pamje 360°.",best:"Prill–Tetor",k:["novobërd","novoberd","gjilan"]},
+];
+const CITIES = [
+ {n:"Prishtinë",lat:42.6629,lng:21.1655,z:13,k:["prishtin","pristina"]},
+ {n:"Prizren",lat:42.2139,lng:20.7397,z:13,k:["prizren"]},
+ {n:"Pejë",lat:42.6593,lng:20.2887,z:13,k:["pej","peja","pec"]},
+ {n:"Gjakovë",lat:42.3803,lng:20.4308,z:13,k:["gjakov"]},
+ {n:"Mitrovicë",lat:42.8914,lng:20.8660,z:13,k:["mitrovic"]},
+ {n:"Gjilan",lat:42.4635,lng:21.4694,z:13,k:["gjilan"]},
+ {n:"Ferizaj",lat:42.3700,lng:21.1550,z:13,k:["ferizaj"]},
+ {n:"Rahovec",lat:42.3997,lng:20.6545,z:13,k:["rahovec","orahovac"]},
+];
+const REGIONS=["Të gjitha","Prishtinë","Prizren","Pejë","Gjakovë","Mitrovicë","Gjilan","Ferizaj","Rahovec"];
+const CATS={natyrë:"🌿 Natyrë",histori:"🏛️ Histori",qytet:"🏙️ Qytet",aventurë:"🧗 Aventurë"};
+
+/* =========================================================
+   MOTI (Open-Meteo, pa key)
+   ========================================================= */
+const WMO = {
+ 0:["☀️","Qiell i pastër"],1:["🌤️","Kryesisht kthjellët"],2:["⛅","Pjesërisht vranët"],3:["☁️","Vranët"],
+ 45:["🌫️","Mjegull"],48:["🌫️","Mjegull me brymë"],51:["🌦️","Shi i imët"],53:["🌦️","Shi i imët"],55:["🌧️","Shi i imët i dendur"],
+ 61:["🌧️","Shi i lehtë"],63:["🌧️","Shi"],65:["🌧️","Shi i fortë"],66:["🌧️","Shi i ngrirë"],67:["🌧️","Shi i ngrirë"],
+ 71:["🌨️","Borë e lehtë"],73:["🌨️","Borë"],75:["❄️","Borë e dendur"],77:["🌨️","Kokrra bore"],
+ 80:["🌦️","Rrebeshe"],81:["🌧️","Rrebeshe"],82:["⛈️","Rrebeshe të forta"],85:["🌨️","Rrebeshe bore"],86:["❄️","Rrebeshe bore"],
+ 95:["⛈️","Stuhi"],96:["⛈️","Stuhi me breshër"],99:["⛈️","Stuhi me breshër"]
+};
+const wmo=c=>WMO[c]||["🌤️","—"];
+const wxCache={};
+async function getWeather(lat,lng){
+  const key=lat.toFixed(2)+","+lng.toFixed(2);
+  if(wxCache[key]&&Date.now()-wxCache[key].t<15*60*1000)return wxCache[key].d;
+  const u=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&timezone=${encodeURIComponent(TZ)}&forecast_days=5`;
+  const r=await fetch(u);if(!r.ok)throw new Error("wx");
+  const d=await r.json();wxCache[key]={t:Date.now(),d};return d;
+}
+async function geocode(name){
+  const u=`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=5&language=sq`;
+  const r=await fetch(u);const d=await r.json();
+  const res=(d.results||[]);
+  return res.find(x=>x.country_code==="XK")||res.find(x=>/kosov/i.test(x.country||""))||res[0]||null;
+}
+function wxTip(code,tmax,pp,place){
+  const cat=place?.cat;
+  if([95,96,99].includes(code))return "⛈️ <b>Stuhi sot.</b> Shmang malet dhe kanionet — zgjedh muze, çarshi ose kafe të qytetit.";
+  if(code>=71&&code<=86){return cat==="aventurë"||place?.id==="brezovica"?"❄️ <b>Borë!</b> Dita ideale për Brezovicë ose Prevallë — merr zinxhirë për gomat.":"❄️ <b>Bie borë.</b> Vendet historike dhe qytetet janë shumë të bukura me borë — vishu ngrohtë.";}
+  if(code>=51&&code<=67||code>=80&&code<=82)return "🌧️ <b>Shi.</b> Ide për sot: Muzeu i Kosovës, Shpella e Gadimes (13°C gjithmonë) ose kantinat e Rahovecit.";
+  if([45,48].includes(code))return "🌫️ <b>Mjegull.</b> Pamjet panoramike do të jenë të kufizuara — prit deri pasdite ose shko në qytet.";
+  if(tmax>=30)return "🔥 <b>Nxehtë.</b> Nisu herët, mbaj ujë. Ujëvarat e Mirushës, Batllava dhe Rugova janë ftohja perfekte.";
+  if(tmax<=3)return "🥶 <b>Ftohtë.</b> Shtresa, doreza, çaj — dhe Brezovica nëse ka borë.";
+  if(code<=2&&pp<20)return cat==="natyrë"||cat==="aventurë"?"☀️ <b>Dita perfekte</b> për këtë vend — hiking, foto, piknik. Krem dielli!":"☀️ <b>Dita e mirë</b> për shëtitje në qytet dhe foto me dritë të mirë. Ngjitu diku lart për panoramë.";
+  return "⛅ <b>Mot i qetë.</b> Mjaft mirë për gjithçka — merr një xhaketë të lehtë për çdo rast.";
+}
+const DAYS=["Die","Hën","Mar","Mër","Enj","Pre","Sht"];
+async function renderWeather(lat,lng,name,sub,place){
+  const el=id=>document.getElementById(id);
+  el("wxName").textContent=name;el("wxSub").textContent=sub||"";
+  el("wxT").textContent="…";el("wxD").textContent="duke marrë motin…";el("wxDays").innerHTML="";
+  try{
+    const d=await getWeather(lat,lng);const c=d.current,dy=d.daily;
+    const [ico,txt]=wmo(c.weather_code);
+    el("wxIco").textContent=c.is_day===0&&c.weather_code<=1?"🌙":ico;
+    el("wxT").textContent=Math.round(c.temperature_2m)+"°";
+    el("wxD").textContent=txt;
+    el("wxFeel").textContent=Math.round(c.apparent_temperature)+"°";
+    el("wxWind").textContent=Math.round(c.wind_speed_10m)+" km/h";
+    el("wxHum").textContent=c.relative_humidity_2m+"%";
+    el("wxSun").textContent=dy.sunrise[0].slice(11)+" / "+dy.sunset[0].slice(11);
+    el("wxTime").textContent="Përditësuar "+new Date(c.time).toLocaleTimeString("sq",{hour:"2-digit",minute:"2-digit"});
+    el("wxDays").innerHTML=dy.time.map((t,i)=>{const dt=new Date(t);const [ic]=wmo(dy.weather_code[i]);
+      return `<div class="day"><div class="n">${i===0?"Sot":DAYS[dt.getDay()]}</div><div class="i">${ic}</div><div class="hi">${Math.round(dy.temperature_2m_max[i])}°</div><div class="lo">${Math.round(dy.temperature_2m_min[i])}°</div><div class="pp">💧${dy.precipitation_probability_max[i]??0}%</div></div>`}).join("");
+    el("wxTip").innerHTML=wxTip(c.weather_code,dy.temperature_2m_max[0],dy.precipitation_probability_max[0]??0,place);
+    return d;
+  }catch(e){el("wxT").textContent="--°";el("wxD").textContent="Moti nuk u ngarkua";return null;}
+}
+async function renderStrip(){
+  const s=document.getElementById("strip");
+  const parts=await Promise.all(CITIES.slice(0,7).map(async c=>{try{const d=await getWeather(c.lat,c.lng);const [ic]=wmo(d.current.weather_code);return `<div class="wchip" onclick="showCity('${c.n}')">${ic} <b>${Math.round(d.current.temperature_2m)}°</b><span>${c.n}</span></div>`}catch{return ""}}));
+  s.innerHTML=`<span class="lbl">Moti tani</span>`+parts.join("")+`<span style="color:var(--muted);font-size:11px;margin-left:auto;white-space:nowrap">Open-Meteo · live</span>`;
+}
+
+/* =========================================================
+   HARTA
+   ========================================================= */
+let cur={lat:42.56,lng:20.9,z:9,title:"Kosova",q:"Kosovo"},mode="map";
+function setMode(m){mode=m;document.querySelectorAll(".seg button").forEach(b=>b.classList.toggle("on",b.dataset.m===m));drawMap();}
+function drawMap(){
+  const f=document.getElementById("map"),note=document.getElementById("mapNote");
+  const q=encodeURIComponent(cur.q||`${cur.lat},${cur.lng}`);
+  if(mode==="sv"){
+    if(GOOGLE_API_KEY){f.src=`https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_API_KEY}&location=${cur.lat},${cur.lng}&heading=0&pitch=0&fov=90`;note.textContent="Street View";}
+    else{window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${cur.lat},${cur.lng}`,"_blank");setMode("map");return;}
+  }else{
+    f.src=`https://www.google.com/maps?q=${q}&ll=${cur.lat},${cur.lng}&z=${cur.z}${mode==="sat"?"&t=k":""}&hl=sq&output=embed`;
+    note.textContent=mode==="sat"?"Satelit":"Google Maps";
+  }
+  document.getElementById("openMaps").href=`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cur.q||cur.lat+","+cur.lng)}`;
+  document.getElementById("mapTitle").innerHTML=cur.title+(cur.sub?` <small>${cur.sub}</small>`:"");
+}
+function focusMap(o){cur={...cur,...o};drawMap();}
+
+/* =========================================================
+   INFO PRAKTIKE
+   ========================================================= */
+const km=(a,b)=>{const R=6371,dL=(b.lat-a.lat)*Math.PI/180,dG=(b.lng-a.lng)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a.lat*Math.PI/180)*Math.cos(b.lat*Math.PI/180)*Math.sin(dG/2)**2;return 2*R*Math.asin(Math.sqrt(x));};
+const drive=k=>{const roadKm=k*1.3,min=Math.round(roadKm/55*60+5);return min<60?min+" min":Math.floor(min/60)+" h "+(min%60)+" min";};
+function renderFacts(p){
+  const el=document.getElementById("factList"),ac=document.getElementById("factActions");
+  document.getElementById("fName").textContent=p.n;
+  const dist=km(PRISHTINA,p),near=PLACES.filter(x=>x.id!==p.id).map(x=>({x,d:km(p,x)})).sort((a,b)=>a.d-b.d).slice(0,4);
+  el.innerHTML=`
+   <div class="fact"><div class="ic">🚗</div><div><b>${dist<2?"Në Prishtinë":Math.round(dist*1.3)+" km nga Prishtina"}</b><span>${dist<2?"Me këmbë ose taksi":"Rreth "+drive(dist)+" me veturë"}</span></div></div>
+   <div class="fact"><div class="ic">📅</div><div><b>Sezoni më i mirë: ${p.best}</b><span>${CATS[p.cat]} · ${p.c}</span></div></div>
+   <div class="fact"><div class="ic">📍</div><div><b>Afër këtu</b><span class="near" style="margin-top:6px">${near.map(n=>`<button onclick="selectPlace('${n.x.id}')">${n.x.ic} ${n.x.n} · ${Math.round(n.d*1.3)} km</button>`).join("")}</span></div></div>`;
+  const inPlan=plan.includes(p.id);
+  ac.innerHTML=`<button class="btn sm" onclick="togglePlan('${p.id}')">${inPlan?"✓ Në plan":"+ Shto në plan"}</button>
+    <a class="btn ghost sm" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}">Drejtime ↗</a>
+    <button class="btn ghost sm" onclick="ask('Çka me bo afër ${p.n}?')">Pyete AI</button>`;
+}
+function renderFactsCity(c){
+  const el=document.getElementById("factList"),ac=document.getElementById("factActions");
+  document.getElementById("fName").textContent=c.n;
+  const here=PLACES.filter(p=>km(c,p)<18).sort((a,b)=>km(c,a)-km(c,b)).slice(0,6);
+  const dist=km(PRISHTINA,c);
+  el.innerHTML=`<div class="fact"><div class="ic">🚗</div><div><b>${dist<2?"Kryeqyteti":Math.round(dist*1.3)+" km nga Prishtina"}</b><span>${dist<2?"Pika e nisjes":"Rreth "+drive(dist)+" me veturë"}</span></div></div>
+   <div class="fact"><div class="ic">⭐</div><div><b>Vendet për të parë këtu</b><span class="near" style="margin-top:6px">${here.map(p=>`<button onclick="selectPlace('${p.id}')">${p.ic} ${p.n}</button>`).join("")||"—"}</span></div></div>`;
+  ac.innerHTML=`<a class="btn ghost sm" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${c.lat},${c.lng}">Drejtime ↗</a><button class="btn ghost sm" onclick="ask('Çka me vizitu në ${c.n}?')">Pyete AI</button>`;
+}
+
+/* =========================================================
+   FOTO & VIDEO
+   ========================================================= */
+async function renderMedia(term,label){
+  const ph=document.getElementById("photos"),vid=document.getElementById("video"),ml=document.getElementById("mlinks");
+  document.getElementById("mediaSub").textContent=label;ph.innerHTML="";vid.classList.add("hidden");vid.innerHTML="";
+  ml.innerHTML=`<a class="btn ghost sm" target="_blank" rel="noopener" href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(term+" Kosovo")}">Më shumë foto ↗</a>
+    <a class="btn ghost sm" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent(term+" Kosovo")}">Video në YouTube ↗</a>`;
+  try{
+    const u=`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(term)}&gsrnamespace=6&gsrlimit=8&prop=imageinfo&iiprop=url&iiurlwidth=480&format=json&origin=*`;
+    const r=await fetch(u);const d=await r.json();
+    const pages=Object.values(d.query?.pages||{}).filter(p=>/\.(jpe?g|png|webp)$/i.test(p.title)).slice(0,8);
+    ph.innerHTML=pages.map(p=>`<a href="${p.imageinfo[0].descriptionurl}" target="_blank" rel="noopener"><img src="${p.imageinfo[0].thumburl}" alt="${p.title.replace(/^File:/,"")}" loading="lazy"></a>`).join("")||`<div style="color:var(--muted);font-size:13px">Nuk u gjetën foto — përdor butonin më poshtë.</div>`;
+  }catch{ph.innerHTML=`<div style="color:var(--muted);font-size:13px">Fotot nuk u ngarkuan.</div>`;}
+  if(YOUTUBE_API_KEY){
+    try{const r=await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(term+" Kosovo")}&key=${YOUTUBE_API_KEY}`);const d=await r.json();const id=d.items?.[0]?.id?.videoId;
+      if(id){vid.innerHTML=`<iframe src="https://www.youtube.com/embed/${id}" allowfullscreen></iframe>`;vid.classList.remove("hidden");}}catch{}
+  }
+}
+
+/* =========================================================
+   ZGJEDHJA E VENDIT / QYTETIT
+   ========================================================= */
+function selectPlace(id,scroll=true){
+  const p=PLACES.find(x=>x.id===id);if(!p)return;
+  focusMap({lat:p.lat,lng:p.lng,z:p.z,title:p.n,sub:p.c,q:p.n+", "+p.c+", Kosovo"});
+  renderWeather(p.lat,p.lng,p.n,p.c+" · "+CATS[p.cat],p);renderFacts(p);renderMedia(p.w,p.n);
+  if(scroll)scrollTo2(".mapcard");
+}
+function showCity(name){
+  const c=CITIES.find(x=>x.n===name);if(!c)return;
+  focusMap({lat:c.lat,lng:c.lng,z:c.z,title:c.n,sub:"qytet",q:c.n+", Kosovo"});
+  renderWeather(c.lat,c.lng,c.n,"Qytet");renderFactsCity(c);renderMedia(c.n+" Kosovo",c.n);scrollTo2(".mapcard");
+}
+async function showQuery(q,title){
+  const g=await geocode(q);
+  if(!g){focusMap({title:title||q,q:q+", Kosovo",z:12});return;}
+  focusMap({lat:g.latitude,lng:g.longitude,z:13,title:title||g.name,sub:g.admin1||"",q:q+", Kosovo"});
+  renderWeather(g.latitude,g.longitude,g.name,g.admin1||"Kosovë");
+  const c={n:g.name,lat:g.latitude,lng:g.longitude};renderFactsCity(c);renderMedia(g.name+" Kosovo",g.name);
+}
+function randomPlace(){selectPlace(PLACES[Math.floor(Math.random()*PLACES.length)].id);}
+function scrollTo2(sel){document.querySelector(sel)?.scrollIntoView({behavior:"smooth",block:"start"});}
+
+/* =========================================================
+   KARTAT
+   ========================================================= */
+let filter="Të gjitha";
+function renderFilters(){document.getElementById("filters").innerHTML=REGIONS.map(r=>`<button class="${r===filter?"on":""}" onclick="filter='${r}';renderFilters();renderCards()">${r}</button>`).join("");}
+async function renderCards(){
+  const list=PLACES.filter(p=>filter==="Të gjitha"||p.r===filter);
+  document.getElementById("cards").innerHTML=list.map(p=>`<div class="pc" onclick="selectPlace('${p.id}')">
+    <div class="img" id="img-${p.id}">${p.ic}<span class="cat">${p.cat}</span><span class="wb" id="wb-${p.id}">…</span></div>
+    <div class="bd"><h4>${p.n}</h4><p>${p.d}</p><div class="ft"><span>📍 ${p.c} · ${Math.round(km(PRISHTINA,p)*1.3)} km</span><button class="add ${plan.includes(p.id)?"in":""}" onclick="event.stopPropagation();togglePlan('${p.id}')">${plan.includes(p.id)?"✓ Në plan":"+ Plan"}</button></div></div></div>`).join("");
+  list.forEach(async p=>{try{const d=await getWeather(p.lat,p.lng);const [ic]=wmo(d.current.weather_code);const e=document.getElementById("wb-"+p.id);if(e)e.textContent=ic+" "+Math.round(d.current.temperature_2m)+"°";}catch{}});
+  list.forEach(async p=>{if(p.img){putImg(p);return;}try{const r=await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(p.w)}&gsrnamespace=6&gsrlimit=3&prop=imageinfo&iiprop=url&iiurlwidth=400&format=json&origin=*`);const d=await r.json();const pg=Object.values(d.query?.pages||{}).find(x=>/\.(jpe?g|png|webp)$/i.test(x.title));if(pg){p.img=pg.imageinfo[0].thumburl;putImg(p);}}catch{}});
+}
+function putImg(p){const e=document.getElementById("img-"+p.id);if(e&&!e.querySelector("img")){const i=document.createElement("img");i.src=p.img;i.alt=p.n;i.loading="lazy";e.prepend(i);}}
+
+/* =========================================================
+   PLANIFIKUESI
+   ========================================================= */
+let plan=[];try{plan=JSON.parse(localStorage.getItem("ke-plan")||"[]");}catch{}
+function savePlan(){try{localStorage.setItem("ke-plan",JSON.stringify(plan));}catch{}document.getElementById("planCount").textContent=plan.length;renderPlan();}
+function togglePlan(id){plan.includes(id)?plan=plan.filter(x=>x!==id):plan.push(id);savePlan();renderCards();const p=PLACES.find(x=>x.id===id);if(document.getElementById("fName").textContent===p?.n)renderFacts(p);}
+function clearPlan(){plan=[];savePlan();renderCards();}
+function toggleDrawer(){document.getElementById("drawer").classList.toggle("open");}
+function renderPlan(){
+  const el=document.getElementById("planList");
+  if(!plan.length){el.innerHTML=`<div class="empty">Plani është bosh.<br>Shto vende nga kartat ose nga info-paneli.</div>`;return;}
+  // rendit sipas afërsisë nga Prishtina (rrugë e thjeshtë)
+  let rem=plan.map(id=>PLACES.find(p=>p.id===id)).filter(Boolean),ordered=[],pos=PRISHTINA;
+  while(rem.length){rem.sort((a,b)=>km(pos,a)-km(pos,b));const n=rem.shift();ordered.push(n);pos=n;}
+  plan=ordered.map(p=>p.id);
+  let tot=0,prev=PRISHTINA;
+  el.innerHTML=ordered.map((p,i)=>{const d=km(prev,p)*1.3;tot+=d;prev=p;return `<div class="pi"><span>${i+1}.</span><div class="n">${p.ic} ${p.n}<small>${p.c} · +${Math.round(d)} km · ${drive(km(ordered[i-1]||PRISHTINA,p))}</small></div><button onclick="togglePlan('${p.id}')" title="Hiqe">✕</button></div>`}).join("")
+   +`<div style="color:var(--muted);font-size:12px;text-align:center;padding:8px">Gjithsej ≈ ${Math.round(tot)} km nga Prishtina</div>`;
+}
+function openRoute(){
+  if(!plan.length)return;const ps=plan.map(id=>PLACES.find(p=>p.id===id));
+  const dest=ps[ps.length-1],wp=ps.slice(0,-1).map(p=>p.lat+","+p.lng).join("|");
+  window.open(`https://www.google.com/maps/dir/?api=1&origin=${PRISHTINA.lat},${PRISHTINA.lng}&destination=${dest.lat},${dest.lng}${wp?"&waypoints="+encodeURIComponent(wp):""}&travelmode=driving`,"_blank");
+}
+function askPlan(){if(!plan.length)return;toggleDrawer();ask("Më bëj itinerarin për: "+plan.map(id=>PLACES.find(p=>p.id===id).n).join(", ")+". Sa ditë duhen dhe në çfarë radhe?");}
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+const hist=[];let aiOn=false;
+const SUGG=["Çka me vizitu në Prishtinë sot?","Ku me shku për hiking?","Moti në Prizren","Vendet UNESCO në Kosovë","Ku me shku me familje verës?","Plan 3 ditësh për Kosovën"];
+const OFF=["kod","programim","javascript","python","matematik","politik","qeveri","zgjedhje","kripto","bitcoin","aksion","ligj","mjek","ilaç","diet","futboll","recet","shqipëri","shqiperi","maqedoni","serbi","mal të zi","turqi","greqi","gjermani","zvic","itali","londër","paris","harro","harroji","ignore","prompt"];
+const KOS=["kosov","prishtin","prizren","pej","gjakov","mitrovic","gjilan","ferizaj","rahovec","rugov","brezovic","gërmi","germi","mirush","ujëvar","ujevar","kala","manastir","xhami","muze","mal","bjeshk","liqen","shpell","hik","vizit","udhëtim","udhetim","turiz","moti","mot","foto","çarshi","carshi","itinerar","plan","afër","afer","shku","shkoj","vend","shih","sheh"];
+const REFUSE="Unë jam udhërrëfyes vetëm për eksplorimin e Kosovës 🇽🇰 — qytete, natyrë, histori, moti, foto dhe itinerare. Për këtë temë nuk mund të ndihmoj. Më pyet p.sh. për Prishtinën, Prizrenin, Rugovën ose Brezovicën.";
+function isOff(t){const s=t.toLowerCase();const off=OFF.some(w=>new RegExp("(^|[^a-zëç])"+w+"[a-zëç]{0,4}","i").test(s));const kos=KOS.some(w=>s.includes(w));return off&&!kos;}
+
+function add(role,text,chips){const m=document.getElementById("msgs");const d=document.createElement("div");d.className="m "+role;d.textContent=text;
+  if(chips?.length){const c=document.createElement("div");c.className="chips";chips.forEach(ch=>{const b=document.createElement("button");b.className="chip";b.textContent=ch.l;b.onclick=ch.f;c.appendChild(b)});d.appendChild(c);}
+  m.appendChild(d);m.scrollTop=m.scrollHeight;return d;}
+function typing(on){let t=document.getElementById("typ");if(on&&!t){t=document.createElement("div");t.id="typ";t.className="m b typing";t.innerHTML="<i></i><i></i><i></i>";document.getElementById("msgs").appendChild(t);t.scrollIntoView();}if(!on&&t)t.remove();}
+function renderSugg(){document.getElementById("sugg").innerHTML=SUGG.map(s=>`<button class="chip" onclick="ask(${JSON.stringify(s)})">${s}</button>`).join("");}
+function clearChat(){document.getElementById("msgs").innerHTML="";hist.length=0;welcome();}
+function welcome(){add("b","Tung! 👋 Unë jam udhërrëfyesi yt për Kosovën. Më pyet për një qytet, vend natyror apo historik — ta tregoj në hartë, motin, fotot dhe çka ia vlen afër. Shto vende në 'Plani im' dhe hape rrugën në Maps.");}
+function ask(t){document.getElementById("q").value=t;send();}
+
+async function send(){
+  const inp=document.getElementById("q"),t=inp.value.trim();if(!t)return;inp.value="";
+  add("u",t);hist.push({role:"user",content:t});
+  if(isOff(t)){add("b",REFUSE).classList.add("warn");hist.push({role:"assistant",content:REFUSE});return;}
+  document.getElementById("send").disabled=true;typing(true);
+  let res=null;
+  if(aiOn){try{const r=await fetch(CHAT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:hist.slice(-12)})});if(r.ok)res=await r.json();}catch{}}
+  if(!res)res=localAnswer(t);
+  typing(false);document.getElementById("send").disabled=false;
+  hist.push({role:"assistant",content:res.answer});
+  const ids=(res.place_ids||[]).filter(id=>PLACES.find(p=>p.id===id));
+  const chips=ids.slice(0,5).map(id=>{const p=PLACES.find(x=>x.id===id);return {l:p.ic+" "+p.n,f:()=>selectPlace(id)}});
+  const node=add("b",res.answer,chips);if(res.deny)node.classList.add("warn");
+  if(res.deny)return;
+  // harta + moti
+  if(ids.length)selectPlace(ids[0],false);
+  else if(res.map_query){const c=CITIES.find(x=>x.n.toLowerCase()===String(res.map_query).toLowerCase());c?showCity(c.n):showQuery(res.map_query,res.map_title);}
+}
+function localAnswer(t){
+  const s=t.toLowerCase();
+  let ids=PLACES.filter(p=>p.k.some(k=>s.includes(k))).map(p=>p.id);
+  const city=CITIES.find(c=>c.k.some(k=>s.includes(k)));
+  if(!ids.length&&city)ids=PLACES.filter(p=>km(city,p)<18).sort((a,b)=>km(city,a)-km(city,b)).slice(0,5).map(p=>p.id);
+  if(!ids.length){const cat=/hik|mal|bjeshk|natyr|liqen|ujëvar|ujevar/.test(s)?"natyrë":/histor|kala|manastir|unesco|xhami|muze/.test(s)?"histori":/aventur|ski|rafting|ferrata|adrenal/.test(s)?"aventurë":/qytet|kafe|nat[ëe]|shëtit|shetit/.test(s)?"qytet":null;
+    if(cat)ids=PLACES.filter(p=>p.cat===cat).slice(0,5).map(p=>p.id);}
+  if(/mot|temperatur|shi|bor[ëe]|ngroht|ftoht/.test(s)&&city&&!PLACES.some(p=>p.k.some(k=>s.includes(k))))return {answer:`Ja moti për ${city.n} — e sheh në panel djathtas (sot + 5 ditë) dhe këshillën se çka ia vlen me bo sipas motit. 👉`,map_query:city.n};
+  if(/plan|itinerar|dit[ëe]/.test(s)&&!ids.length)ids=["kalaja-prizren","ura-gurit","rugova","patriarkana","carshia","biblioteka","gracanica"];
+  if(!ids.length)return {answer:"Nuk e gjeta këtë vend në bazën time lokale. Provo me emrin e qytetit (Prishtinë, Prizren, Pejë, Gjakovë, Mitrovicë, Gjilan, Ferizaj, Rahovec) ose kliko një kartë më poshtë.",map_query:null};
+  const ps=ids.map(id=>PLACES.find(p=>p.id===id));
+  return {answer:(city?`Për ${city.n} ta rekomandoj:\n`:"Ta rekomandoj:\n")+ps.map(p=>`${p.ic} ${p.n} — ${p.d}`).join("\n")+"\n\nKliko një vend për hartën, motin dhe fotot.",place_ids:ids,map_query:city?.n||null};
+}
+async function checkAI(){try{const r=await fetch(CHAT_ENDPOINT,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({ping:true})});const d=r.ok?await r.json():{};aiOn=!!d.ai;}catch{aiOn=false;}
+  document.getElementById("aiTxt").textContent=aiOn?"AI aktiv":"Baza lokale";document.querySelector("#aiPill i").style.background=aiOn?"var(--acc2)":"var(--acc)";}
+
+/* =========================================================
+   START
+   ========================================================= */
+document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter")send();});
+welcome();renderSugg();renderFilters();renderCards();renderPlan();document.getElementById("planCount").textContent=plan.length;
+drawMap();renderStrip();renderWeather(PRISHTINA.lat,PRISHTINA.lng,"Prishtinë","Kryeqyteti · moti tani");checkAI();
+</script>
+</body>
+</html>
